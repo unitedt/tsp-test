@@ -13,8 +13,8 @@ REDIS_HSET = False
 MC = False
 
 NUM_ENTRIES = 150 * 1000000
-MIN_VAL = 1000000000
-MAX_VAL = 9999999999
+MIN_VAL = 1000000001
+MAX_VAL = 1150000000
 
 if len(sys.argv) != 2 or sys.argv[1] not in ('redis-normal', 'redis-hashes', 'memcached'):
     print 'Specify a test: redis-normal, redis-hashes, memcached'
@@ -28,15 +28,14 @@ elif sys.argv[1] == 'memcached':
     MC = True
 
 p = r.pipeline()
-for i in range(0, NUM_ENTRIES):
-    value = random.randint(MIN_VAL, MAX_VAL)
+for i in range(MIN_VAL, MAX_VAL):
     if MC:
-        mc.set(str(i), value)
+        mc.set(str(i), True)
     elif REDIS_SETGET:
-        r.set(str(i), value)
+        r.set(str(i), True)
     elif REDIS_HSET:
-        bucket = int(i / 500)
-        p.hset(bucket, i, value)
+        bucket = i % int (NUM_ENTRIES / 500)
+        p.hset(bucket, i, True)
 
     if i % (NUM_ENTRIES/(150 * 10)) == 0:
         if REDIS_SETGET or REDIS_HSET:
